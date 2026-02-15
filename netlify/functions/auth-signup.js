@@ -12,20 +12,17 @@ exports.handler = async (event) => {
     if (!email || !password || !displayName) {
       return createResponse(400, { error: 'Email, password, and display name are required' });
     }
-
     if (password.length < 6) {
       return createResponse(400, { error: 'Password must be at least 6 characters' });
     }
 
     const sql = getDb();
 
-    // Check if user exists
     const existing = await sql`SELECT id FROM users WHERE email = ${email.toLowerCase()}`;
     if (existing.length > 0) {
       return createResponse(409, { error: 'An account with this email already exists' });
     }
 
-    // Hash password and create user
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await sql`
       INSERT INTO users (email, password_hash, display_name)
@@ -34,6 +31,13 @@ exports.handler = async (event) => {
     `;
 
     const user = result[0];
+
+    // Create a default list for the new user
+    await sql`
+      INSERT INTO lists (owner_id, name, color)
+      VALUES (${user.id}, 'My Tasks', '#6c5ce7')
+    `;
+
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     return createResponse(201, {

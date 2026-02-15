@@ -1,22 +1,22 @@
 const API_BASE = '/.netlify/functions';
 
 function getToken() {
-  return localStorage.getItem('tf_token');
+  return localStorage.getItem('tdl_token');
 }
 
 function setAuth(token, user) {
-  localStorage.setItem('tf_token', token);
-  localStorage.setItem('tf_user', JSON.stringify(user));
+  localStorage.setItem('tdl_token', token);
+  localStorage.setItem('tdl_user', JSON.stringify(user));
 }
 
 function clearAuth() {
-  localStorage.removeItem('tf_token');
-  localStorage.removeItem('tf_user');
+  localStorage.removeItem('tdl_token');
+  localStorage.removeItem('tdl_user');
 }
 
 function getUser() {
   try {
-    const u = localStorage.getItem('tf_user');
+    const u = localStorage.getItem('tdl_user');
     return u ? JSON.parse(u) : null;
   } catch {
     return null;
@@ -39,20 +39,34 @@ async function request(endpoint, options = {}) {
 }
 
 export const api = {
+  // Auth
   signup: (email, password, displayName) =>
     request('/auth-signup', { method: 'POST', body: JSON.stringify({ email, password, displayName }) }),
-
   login: (email, password) =>
     request('/auth-login', { method: 'POST', body: JSON.stringify({ email, password }) }),
 
-  getTodos: () => request('/todos'),
+  // Lists
+  getLists: () => request('/lists'),
+  createList: (name, color) =>
+    request('/lists', { method: 'POST', body: JSON.stringify({ name, color }) }),
+  updateList: (id, updates) =>
+    request('/lists', { method: 'PUT', body: JSON.stringify({ id, ...updates }) }),
+  deleteList: (id) =>
+    request('/lists', { method: 'DELETE', body: JSON.stringify({ id }) }),
 
-  createTodo: (title, description, priority) =>
-    request('/todos', { method: 'POST', body: JSON.stringify({ title, description, priority }) }),
+  // Sharing
+  getShares: (listId) => request(`/shares?listId=${listId}`),
+  shareList: (listId, email, permission) =>
+    request('/shares', { method: 'POST', body: JSON.stringify({ listId, email, permission }) }),
+  unshare: (listId, userId) =>
+    request('/shares', { method: 'DELETE', body: JSON.stringify({ listId, userId }) }),
 
+  // Todos
+  getTodos: (listId) => request(`/todos?listId=${listId}`),
+  createTodo: (listId, title, description, priority) =>
+    request('/todos', { method: 'POST', body: JSON.stringify({ listId, title, description, priority }) }),
   updateTodo: (id, updates) =>
     request('/todos', { method: 'PUT', body: JSON.stringify({ id, ...updates }) }),
-
   deleteTodo: (id) =>
     request('/todos', { method: 'DELETE', body: JSON.stringify({ id }) }),
 };

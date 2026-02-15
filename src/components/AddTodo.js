@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './AddTodo.css';
 
-function AddTodo({ onAdd, onCancel }) {
+function AddTodo({ onAdd, onCancel, color }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('medium');
@@ -23,49 +23,37 @@ function AddTodo({ onAdd, onCancel }) {
   };
 
   return (
-    <form className="add-todo-form" onSubmit={handleSubmit}>
+    <form className="add-todo-form" onSubmit={handleSubmit} style={{ borderColor: color }}>
       <input
-        type="text"
-        className="add-todo-title"
+        type="text" className="add-todo-title"
         placeholder="What needs to be done?"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        autoFocus
-        required
+        value={title} onChange={(e) => setTitle(e.target.value)}
+        autoFocus required
       />
       <textarea
         className="add-todo-desc"
         placeholder="Add a description (optional)"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        value={description} onChange={(e) => setDescription(e.target.value)}
         rows={2}
       />
-
       <div className="add-todo-footer">
         <div className="priority-selector">
           {['low', 'medium', 'high'].map((p) => (
-            <button
-              key={p}
-              type="button"
+            <button key={p} type="button"
               className={`priority-btn priority-${p} ${priority === p ? 'active' : ''}`}
               onClick={() => setPriority(p)}
             >
-              <span className="priority-dot" />
-              {p}
+              <span className="priority-dot" />{p}
             </button>
           ))}
         </div>
-
         <div className="add-todo-actions">
-          <button type="button" className="cancel-btn" onClick={onCancel}>
-            Cancel
-          </button>
-          <button type="submit" className="submit-btn" disabled={loading || !title.trim()}>
+          <button type="button" className="cancel-btn" onClick={onCancel}>Cancel</button>
+          <button type="submit" className="submit-btn" disabled={loading || !title.trim()} style={{ background: color }}>
             {loading ? 'Adding...' : 'Add task'}
           </button>
         </div>
       </div>
-
       {error && <div className="add-error">{error}</div>}
     </form>
   );

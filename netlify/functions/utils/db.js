@@ -50,4 +50,18 @@ function verifyToken(event) {
   }
 }
 
-module.exports = { getDb, createResponse, handleOptions, verifyToken, JWT_SECRET };
+// Check if a user has access to a list (owner or shared)
+async function checkListAccess(sql, listId, userId) {
+  const result = await sql`
+    SELECT l.id, l.owner_id, l.name, l.color,
+      CASE WHEN l.owner_id = ${userId} THEN 'owner'
+           ELSE COALESCE(ls.permission, NULL)
+      END as permission
+    FROM lists l
+    LEFT JOIN list_shares ls ON ls.list_id = l.id AND ls.shared_with_id = ${userId}
+    WHERE l.id = ${listId} AND (l.owner_id = ${userId} OR ls.shared_with_id = ${userId})
+  `;
+  return result.length > 0 ? result[0] : null;
+}
+
+module.exports = { getDb, createResponse, handleOptions, verifyToken, checkListAccess, JWT_SECRET };

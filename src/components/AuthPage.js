@@ -14,7 +14,6 @@ function AuthPage({ onAuth }) {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       let data;
       if (mode === 'signup') {
@@ -37,15 +36,15 @@ function AuthPage({ onAuth }) {
       <div className="auth-container fade-in">
         <div className="auth-brand">
           <div className="auth-logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <rect x="2" y="2" width="28" height="28" rx="8" stroke="currentColor" strokeWidth="2.5"/>
-              <path d="M10 16L14 20L22 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <rect x="2" y="2" width="32" height="32" rx="9" stroke="currentColor" strokeWidth="2.5"/>
+              <path d="M11 18L15 22L25 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <h1 className="auth-title">
-            <span className="auth-title-serif">Taskflow</span>
+            <span className="auth-title-accent">2doo</span><span className="auth-title-serif">lists</span>
           </h1>
-          <p className="auth-subtitle">Organize your day with clarity</p>
+          <p className="auth-subtitle">Organize, share, and conquer your tasks</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -53,68 +52,41 @@ function AuthPage({ onAuth }) {
             <div className="form-field slide-down">
               <label htmlFor="displayName">Name</label>
               <input
-                id="displayName"
-                type="text"
-                placeholder="What should we call you?"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                required
-                autoComplete="name"
+                id="displayName" type="text" placeholder="What should we call you?"
+                value={displayName} onChange={(e) => setDisplayName(e.target.value)}
+                required autoComplete="name"
               />
             </div>
           )}
-
           <div className="form-field">
             <label htmlFor="email">Email</label>
             <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
+              id="email" type="email" placeholder="you@example.com"
+              value={email} onChange={(e) => setEmail(e.target.value)}
+              required autoComplete="email"
             />
           </div>
-
           <div className="form-field">
             <label htmlFor="password">Password</label>
             <input
-              id="password"
-              type="password"
+              id="password" type="password"
               placeholder={mode === 'signup' ? 'Min 6 characters' : 'Enter your password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              required minLength={6}
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
             />
           </div>
-
           {error && <div className="auth-error slide-down">{error}</div>}
-
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? (
-              <span className="btn-loader" />
-            ) : mode === 'login' ? (
-              'Sign in'
-            ) : (
-              'Create account'
-            )}
+            {loading ? <span className="btn-loader" /> : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
 
         <div className="auth-switch">
           {mode === 'login' ? (
-            <p>
-              Don't have an account?{' '}
-              <button onClick={() => { setMode('signup'); setError(''); }}>Sign up</button>
-            </p>
+            <p>Don't have an account?{' '}<button onClick={() => { setMode('signup'); setError(''); }}>Sign up</button></p>
           ) : (
-            <p>
-              Already have an account?{' '}
-              <button onClick={() => { setMode('login'); setError(''); }}>Sign in</button>
-            </p>
+            <p>Already have an account?{' '}<button onClick={() => { setMode('login'); setError(''); }}>Sign in</button></p>
           )}
         </div>
       </div>
