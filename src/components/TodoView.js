@@ -35,8 +35,8 @@ function TodoView({ list, user, onListCountChange }) {
   const canEdit = permission === 'owner' || permission === 'edit';
   const isOwner = permission === 'owner';
 
-  const handleAdd = async (title, description, priority) => {
-    const data = await api.createTodo(list.id, title, description, priority);
+  const handleAdd = async (title, description, priority, dueDate) => {
+    const data = await api.createTodo(list.id, title, description, priority, dueDate);
     setTodos((prev) => [data.todo, ...prev]);
     setShowAdd(false);
     onListCountChange();

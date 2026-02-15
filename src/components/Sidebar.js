@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './Sidebar.css';
 
 const LIST_COLORS = ['#6c5ce7', '#00d2a0', '#ff6b6b', '#ffc53d', '#0984e3', '#e84393', '#00cec9', '#fd79a8'];
@@ -9,6 +9,19 @@ function Sidebar({ lists, activeListId, onSelect, onCreate, onDelete, onUpdate, 
   const [newColor, setNewColor] = useState('#6c5ce7');
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
+  const editRef = useRef(null);
+
+  useEffect(() => {
+    if (editingId !== null && editRef.current) {
+      const timer = setTimeout(() => {
+        if (editRef.current) {
+          editRef.current.focus();
+          editRef.current.select();
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [editingId]);
 
   const handleCreate = (e) => {
     e.preventDefault();
@@ -20,7 +33,7 @@ function Sidebar({ lists, activeListId, onSelect, onCreate, onDelete, onUpdate, 
   };
 
   const handleEditSave = (id) => {
-    if (editName.trim()) {
+    if (editName.trim() && editName.trim() !== (lists.find(l => l.id === id)?.name || '')) {
       onUpdate(id, { name: editName.trim() });
     }
     setEditingId(null);
@@ -99,11 +112,11 @@ function Sidebar({ lists, activeListId, onSelect, onCreate, onDelete, onUpdate, 
                   {editingId === list.id ? (
                     <input
                       className="sidebar-edit-input"
+                      ref={editRef}
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       onBlur={() => handleEditSave(list.id)}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleEditSave(list.id); if (e.key === 'Escape') setEditingId(null); }}
-                      autoFocus
                       onClick={(e) => e.stopPropagation()}
                     />
                   ) : (

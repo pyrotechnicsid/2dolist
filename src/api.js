@@ -63,8 +63,8 @@ export const api = {
 
   // Todos
   getTodos: (listId) => request(`/todos?listId=${listId}`),
-  createTodo: (listId, title, description, priority) =>
-    request('/todos', { method: 'POST', body: JSON.stringify({ listId, title, description, priority }) }),
+  createTodo: (listId, title, description, priority, dueDate) =>
+    request('/todos', { method: 'POST', body: JSON.stringify({ listId, title, description, priority, dueDate }) }),
   updateTodo: (id, updates) =>
     request('/todos', { method: 'PUT', body: JSON.stringify({ id, ...updates }) }),
   deleteTodo: (id) =>

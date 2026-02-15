@@ -18,7 +18,7 @@ exports.handler = async (event) => {
       if (!access) return createResponse(403, { error: 'You do not have access to this list' });
 
       const todos = await sql`
-        SELECT id, list_id, title, description, completed, priority, created_at, updated_at
+        SELECT id, list_id, title, description, completed, priority, due_date, created_at, updated_at
         FROM todos WHERE list_id = ${listId}
         ORDER BY
           completed ASC,
@@ -30,7 +30,7 @@ exports.handler = async (event) => {
 
     // POST - create todo in a list
     if (event.httpMethod === 'POST') {
-      const { listId, title, description, priority } = JSON.parse(event.body);
+      const { listId, title, description, priority, dueDate } = JSON.parse(event.body);
       if (!listId || !title || !title.trim()) {
         return createResponse(400, { error: 'listId and title are required' });
       }
@@ -40,9 +40,9 @@ exports.handler = async (event) => {
       if (access.permission === 'view') return createResponse(403, { error: 'You have view-only access to this list' });
 
       const result = await sql`
-        INSERT INTO todos (list_id, title, description, priority)
-        VALUES (${listId}, ${title.trim()}, ${description || ''}, ${priority || 'medium'})
-        RETURNING id, list_id, title, description, completed, priority, created_at, updated_at
+        INSERT INTO todos (list_id, title, description, priority, due_date)
+        VALUES (${listId}, ${title.trim()}, ${description || ''}, ${priority || 'medium'}, ${dueDate || null})
+        RETURNING id, list_id, title, description, completed, priority, due_date, created_at, updated_at
       `;
 
       // Update list timestamp
@@ -53,7 +53,7 @@ exports.handler = async (event) => {
 
     // PUT - update todo
     if (event.httpMethod === 'PUT') {
-      const { id, title, description, completed, priority } = JSON.parse(event.body);
+      const { id, title, description, completed, priority, dueDate } = JSON.parse(event.body);
       if (!id) return createResponse(400, { error: 'Todo ID is required' });
 
       // Get the todo's list and check access
@@ -70,9 +70,10 @@ exports.handler = async (event) => {
           description = COALESCE(${description !== undefined ? description : null}, description),
           completed = COALESCE(${completed !== undefined ? completed : null}, completed),
           priority = COALESCE(${priority || null}, priority),
+          due_date = CASE WHEN ${dueDate !== undefined} THEN ${dueDate !== undefined ? (dueDate || null) : null} ELSE due_date END,
           updated_at = NOW()
         WHERE id = ${id}
-        RETURNING id, list_id, title, description, completed, priority, created_at, updated_at
+        RETURNING id, list_id, title, description, completed, priority, due_date, created_at, updated_at
       `;
 
       if (result.length === 0) return createResponse(404, { error: 'Todo not found' });

@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS todos (
   description TEXT DEFAULT '',
   completed BOOLEAN DEFAULT FALSE,
   priority VARCHAR(10) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
+  due_date DATE DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

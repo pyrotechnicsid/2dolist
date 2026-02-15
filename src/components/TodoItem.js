@@ -33,6 +33,34 @@ function TodoItem({ todo, onToggle, onUpdate, onDelete, canEdit, accentColor }) 
     return new Date(dateStr).toLocaleDateString();
   };
 
+  const formatDueDate = (dateStr) => {
+    if (!dateStr) return null;
+    const due = new Date(dateStr + 'T00:00:00');
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((due - now) / (1000 * 60 * 60 * 24));
+
+    let label;
+    if (diffDays < 0) label = `${Math.abs(diffDays)}d overdue`;
+    else if (diffDays === 0) label = 'Due today';
+    else if (diffDays === 1) label = 'Due tomorrow';
+    else if (diffDays <= 7) label = `Due in ${diffDays}d`;
+    else label = `Due ${due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
+    let status = 'upcoming';
+    if (diffDays < 0) status = 'overdue';
+    else if (diffDays === 0) status = 'today';
+    else if (diffDays <= 2) status = 'soon';
+
+    return { label, status };
+  };
+
+  const dueInfo = formatDueDate(todo.due_date);
+
+  const handleDateChange = (e) => {
+    onUpdate({ dueDate: e.target.value || null });
+  };
+
   return (
     <div className={`todo-item ${todo.completed ? 'completed' : ''} ${deleting ? 'deleting' : ''}`}>
       <button
@@ -63,12 +91,41 @@ function TodoItem({ todo, onToggle, onUpdate, onDelete, canEdit, accentColor }) 
           <span className={`todo-priority priority-${todo.priority}`}>
             <span className="priority-dot" />{todo.priority}
           </span>
+          {dueInfo && !todo.completed && (
+            <span className={`todo-due todo-due-${dueInfo.status}`}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              {dueInfo.label}
+            </span>
+          )}
+          {dueInfo && todo.completed && (
+            <span className="todo-due todo-due-done">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              {new Date(todo.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </span>
+          )}
           <span className="todo-time">{timeAgo(todo.created_at)}</span>
         </div>
         {todo.description && <div className="todo-description">{todo.description}</div>}
       </div>
       {canEdit && (
         <div className="todo-actions">
+          {!todo.completed && (
+            <label className="todo-action-btn date-action" title="Set due date">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <input
+                type="date"
+                className="todo-date-hidden"
+                value={todo.due_date || ''}
+                onChange={handleDateChange}
+              />
+            </label>
+          )}
           {!todo.completed && (
             <button className="todo-action-btn edit" onClick={() => setEditing(true)} title="Edit">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
