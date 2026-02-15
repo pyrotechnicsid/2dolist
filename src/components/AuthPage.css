@@ -89,4 +89,8 @@
 .auth-switch { text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 0.9rem; }
 .auth-switch button { background: none; border: none; color: var(--accent); font-weight: 600; font-size: 0.9rem; padding: 0; }
 .auth-switch button:hover { color: #8b7ef0; }
+.made-by {
+  text-align: center; margin-top: 32px;
+  font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.04em;
+}
 @media (max-width: 480px) { .auth-form { padding: 24px; } .auth-title { font-size: 2rem; } }

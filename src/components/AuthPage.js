@@ -89,6 +89,7 @@ function AuthPage({ onAuth }) {
             <p>Already have an account?{' '}<button onClick={() => { setMode('login'); setError(''); }}>Sign in</button></p>
           )}
         </div>
+        <div className="made-by">Made by Sid Bose</div>
       </div>
     </div>
   );

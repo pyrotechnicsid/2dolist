@@ -164,6 +164,7 @@ function Sidebar({ lists, activeListId, onSelect, onCreate, onDelete, onUpdate, 
           </div>
         )}
       </div>
+      <div className="sidebar-footer">Made by Sid Bose</div>
     </aside>
   );
 }
