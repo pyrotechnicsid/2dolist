@@ -64,23 +64,15 @@
 .todo-action-btn.delete:hover { color: var(--danger); background: var(--danger-soft); border-color: rgba(255,107,107,0.2); }
 .todo-action-btn.date-action:hover { color: var(--warning); background: var(--warning-soft); border-color: rgba(255,197,61,0.2); }
 
-/* Hidden date input inside the calendar action button */
+/* Hidden date input for the calendar action button */
 .todo-date-hidden {
   position: absolute;
   width: 0; height: 0;
   opacity: 0;
   pointer-events: none;
-}
-.todo-action-btn.date-action {
-  position: relative;
-  overflow: visible;
-}
-.todo-action-btn.date-action input {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  opacity: 0;
-  cursor: pointer;
+  border: none;
+  padding: 0;
+  color-scheme: dark;
 }
 
 @media (max-width: 600px) {
