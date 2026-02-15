@@ -8,6 +8,83 @@
 .todo-item.completed:hover { opacity: 0.75; }
 .todo-item.deleting { opacity: 0.3; transform: scale(0.98); pointer-events: none; }
 
+/* Edit mode - full form layout */
+.todo-item-editing {
+  flex-direction: column;
+  gap: 12px;
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow);
+}
+.todo-item-editing:hover { background: var(--bg-card); }
+
+.edit-form-title {
+  background: none; border: none; font-size: 1rem; font-weight: 500;
+  color: var(--text-primary); outline: none; padding: 0; width: 100%;
+}
+.edit-form-title::placeholder { color: var(--text-muted); }
+.edit-form-desc {
+  background: none; border: none; font-size: 0.88rem; color: var(--text-secondary);
+  outline: none; resize: none; padding: 0; line-height: 1.5; width: 100%;
+}
+.edit-form-desc::placeholder { color: var(--text-muted); }
+.edit-form-options {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border);
+}
+.edit-form-row {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.edit-form-date {
+  display: flex; align-items: center; gap: 6px;
+}
+.edit-date-icon { color: var(--text-muted); flex-shrink: 0; }
+.edit-date-input {
+  background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 10px; font-size: 0.78rem; color: var(--text-secondary);
+  outline: none; cursor: pointer; transition: border-color var(--transition);
+  color-scheme: dark; font-family: var(--font-body);
+}
+.edit-date-input:focus { border-color: var(--border-focus); }
+.edit-date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+.edit-date-clear {
+  background: none; border: none; color: var(--text-muted); padding: 2px;
+  display: flex; align-items: center; cursor: pointer; transition: color var(--transition);
+}
+.edit-date-clear:hover { color: var(--danger); }
+.edit-form-actions {
+  display: flex; gap: 8px; align-self: flex-end;
+}
+.edit-cancel-btn {
+  background: none; border: 1px solid var(--border); color: var(--text-secondary);
+  border-radius: var(--radius-sm); padding: 7px 16px; font-size: 0.82rem; font-weight: 500;
+  transition: all var(--transition); cursor: pointer;
+}
+.edit-cancel-btn:hover { border-color: var(--text-muted); color: var(--text-primary); }
+.edit-save-btn {
+  border: none; color: #fff; border-radius: var(--radius-sm);
+  padding: 7px 18px; font-size: 0.82rem; font-weight: 600;
+  transition: all var(--transition); cursor: pointer;
+}
+.edit-save-btn:hover:not(:disabled) { filter: brightness(1.1); }
+.edit-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Priority buttons (shared between AddTodo and edit form) */
+.priority-selector { display: flex; gap: 4px; }
+.priority-btn {
+  background: none; border: 1px solid var(--border); border-radius: 20px;
+  padding: 5px 12px; font-size: 0.75rem; font-weight: 500; color: var(--text-secondary);
+  display: flex; align-items: center; gap: 5px; text-transform: capitalize;
+  transition: all var(--transition); cursor: pointer;
+}
+.priority-dot { width: 7px; height: 7px; border-radius: 50%; }
+.priority-low .priority-dot { background: var(--low); }
+.priority-medium .priority-dot { background: var(--medium); }
+.priority-high .priority-dot { background: var(--high); }
+.priority-btn.active.priority-low { border-color: var(--low); background: var(--success-soft); color: var(--low); }
+.priority-btn.active.priority-medium { border-color: var(--medium); background: var(--warning-soft); color: var(--medium); }
+.priority-btn.active.priority-high { border-color: var(--high); background: var(--danger-soft); color: var(--high); }
+
+/* Checkbox */
 .todo-check {
   flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px;
   border: 2px solid var(--border); background: none;
@@ -18,14 +95,10 @@
 .todo-check.checked { animation: checkPop 0.3s ease; }
 .todo-check:disabled { cursor: default; }
 
+/* Content */
 .todo-content { flex: 1; min-width: 0; }
 .todo-title { font-size: 0.92rem; font-weight: 500; color: var(--text-primary); line-height: 1.4; cursor: default; }
 .completed .todo-title { text-decoration: line-through; color: var(--text-muted); }
-.todo-edit-input {
-  width: 100%; background: var(--bg-input); border: 1px solid var(--border-focus);
-  border-radius: 6px; padding: 6px 10px; font-size: 0.92rem; font-weight: 500;
-  color: var(--text-primary); outline: none; box-shadow: 0 0 0 3px var(--accent-soft);
-}
 .todo-meta { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
 .todo-priority {
   font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
@@ -53,6 +126,7 @@
 .todo-time { font-size: 0.72rem; color: var(--text-muted); }
 .todo-description { font-size: 0.82rem; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; }
 
+/* Action buttons */
 .todo-actions { display: flex; gap: 4px; opacity: 0; transition: opacity var(--transition); flex-shrink: 0; }
 .todo-item:hover .todo-actions { opacity: 1; }
 .todo-action-btn {
@@ -62,20 +136,11 @@
 }
 .todo-action-btn.edit:hover { color: var(--accent); background: var(--accent-soft); border-color: rgba(108,92,231,0.2); }
 .todo-action-btn.delete:hover { color: var(--danger); background: var(--danger-soft); border-color: rgba(255,107,107,0.2); }
-.todo-action-btn.date-action:hover { color: var(--warning); background: var(--warning-soft); border-color: rgba(255,197,61,0.2); }
-
-/* Hidden date input for the calendar action button */
-.todo-date-hidden {
-  position: absolute;
-  width: 0; height: 0;
-  opacity: 0;
-  pointer-events: none;
-  border: none;
-  padding: 0;
-  color-scheme: dark;
-}
 
 @media (max-width: 600px) {
   .todo-actions { opacity: 1; }
   .todo-item { padding: 14px; gap: 12px; }
+  .edit-form-options { flex-direction: column; }
+  .edit-form-actions { align-self: stretch; }
+  .edit-cancel-btn, .edit-save-btn { flex: 1; text-align: center; }
 }

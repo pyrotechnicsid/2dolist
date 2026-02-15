@@ -1,20 +1,47 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import './TodoItem.css';
 
 function TodoItem({ todo, onToggle, onUpdate, onDelete, canEdit, accentColor }) {
   const [editing, setEditing] = useState(false);
-  const [title, setTitle] = useState(todo.title);
+  const [editTitle, setEditTitle] = useState(todo.title);
+  const [editDesc, setEditDesc] = useState(todo.description || '');
+  const [editPriority, setEditPriority] = useState(todo.priority);
+  const [editDueDate, setEditDueDate] = useState(todo.due_date ? todo.due_date.split('T')[0] : '');
   const [deleting, setDeleting] = useState(false);
-  const dateRef = useRef(null);
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    if (title.trim() && title !== todo.title) onUpdate({ title: title.trim() });
-    setEditing(false);
+  const openEdit = () => {
+    setEditTitle(todo.title);
+    setEditDesc(todo.description || '');
+    setEditPriority(todo.priority);
+    setEditDueDate(todo.due_date ? todo.due_date.split('T')[0] : '');
+    setEditing(true);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleSave();
-    if (e.key === 'Escape') { setTitle(todo.title); setEditing(false); }
+  const handleSave = async () => {
+    if (!editTitle.trim()) return;
+    setSaving(true);
+    try {
+      const updates = {};
+      if (editTitle.trim() !== todo.title) updates.title = editTitle.trim();
+      if (editDesc !== (todo.description || '')) updates.description = editDesc;
+      if (editPriority !== todo.priority) updates.priority = editPriority;
+      const oldDate = todo.due_date ? todo.due_date.split('T')[0] : '';
+      if (editDueDate !== oldDate) updates.dueDate = editDueDate || null;
+
+      if (Object.keys(updates).length > 0) {
+        await onUpdate(updates);
+      }
+      setEditing(false);
+    } catch (err) {
+      console.error('Save failed:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditing(false);
   };
 
   const handleDelete = async () => {
@@ -36,7 +63,6 @@ function TodoItem({ todo, onToggle, onUpdate, onDelete, canEdit, accentColor }) 
 
   const formatDueDate = (dateStr) => {
     if (!dateStr) return null;
-    // Handle both "2025-02-20" and "2025-02-20T00:00:00.000Z" formats
     const dateOnly = dateStr.split('T')[0];
     const parts = dateOnly.split('-');
     if (parts.length !== 3) return null;
@@ -64,10 +90,73 @@ function TodoItem({ todo, onToggle, onUpdate, onDelete, canEdit, accentColor }) 
 
   const dueInfo = formatDueDate(todo.due_date);
 
-  const handleDateChange = (e) => {
-    onUpdate({ dueDate: e.target.value || null });
-  };
+  // ---- EDITING MODE ----
+  if (editing) {
+    return (
+      <div className="todo-item todo-item-editing">
+        <input
+          type="text"
+          className="edit-form-title"
+          value={editTitle}
+          onChange={(e) => setEditTitle(e.target.value)}
+          placeholder="Task title"
+          autoFocus
+        />
+        <textarea
+          className="edit-form-desc"
+          value={editDesc}
+          onChange={(e) => setEditDesc(e.target.value)}
+          placeholder="Description (optional)"
+          rows={2}
+        />
+        <div className="edit-form-options">
+          <div className="edit-form-row">
+            <div className="priority-selector">
+              {['low', 'medium', 'high'].map((p) => (
+                <button key={p} type="button"
+                  className={`priority-btn priority-${p} ${editPriority === p ? 'active' : ''}`}
+                  onClick={() => setEditPriority(p)}
+                >
+                  <span className="priority-dot" />{p}
+                </button>
+              ))}
+            </div>
+            <div className="edit-form-date">
+              <svg className="edit-date-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <input
+                type="date"
+                className="edit-date-input"
+                value={editDueDate}
+                onChange={(e) => setEditDueDate(e.target.value)}
+              />
+              {editDueDate && (
+                <button type="button" className="edit-date-clear" onClick={() => setEditDueDate('')} title="Clear date">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="edit-form-actions">
+            <button className="edit-cancel-btn" onClick={handleCancel}>Cancel</button>
+            <button
+              className="edit-save-btn"
+              onClick={handleSave}
+              disabled={saving || !editTitle.trim()}
+              style={{ background: accentColor }}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  // ---- DISPLAY MODE ----
   return (
     <div className={`todo-item ${todo.completed ? 'completed' : ''} ${deleting ? 'deleting' : ''}`}>
       <button
@@ -83,17 +172,9 @@ function TodoItem({ todo, onToggle, onUpdate, onDelete, canEdit, accentColor }) 
         )}
       </button>
       <div className="todo-content">
-        {editing ? (
-          <input
-            className="todo-edit-input"
-            value={title} onChange={(e) => setTitle(e.target.value)}
-            onBlur={handleSave} onKeyDown={handleKeyDown} autoFocus
-          />
-        ) : (
-          <div className="todo-title" onDoubleClick={() => { if (canEdit && !todo.completed) setEditing(true); }}>
-            {todo.title}
-          </div>
-        )}
+        <div className="todo-title" onDoubleClick={() => { if (canEdit && !todo.completed) openEdit(); }}>
+          {todo.title}
+        </div>
         <div className="todo-meta">
           <span className={`todo-priority priority-${todo.priority}`}>
             <span className="priority-dot" />{todo.priority}
@@ -121,27 +202,7 @@ function TodoItem({ todo, onToggle, onUpdate, onDelete, canEdit, accentColor }) 
       {canEdit && (
         <div className="todo-actions">
           {!todo.completed && (
-            <>
-              <input
-                type="date"
-                ref={dateRef}
-                className="todo-date-hidden"
-                value={todo.due_date ? todo.due_date.split('T')[0] : ''}
-                onChange={handleDateChange}
-              />
-              <button
-                className="todo-action-btn date-action"
-                onClick={() => dateRef.current && dateRef.current.showPicker()}
-                title="Set due date"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-              </button>
-            </>
-          )}
-          {!todo.completed && (
-            <button className="todo-action-btn edit" onClick={() => setEditing(true)} title="Edit">
+            <button className="todo-action-btn edit" onClick={openEdit} title="Edit">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
